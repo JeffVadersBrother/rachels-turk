@@ -72,10 +72,46 @@ PI_HOST=trevor@192.168.1.50 tools/deploy.sh
 
 ### Secrets
 
-Credentials for the upstream data sources go in `/home/trevor/rachels-turk/.env`
-on the Pi. The systemd unit reads it if it is there and starts fine if it is
-not. It is never in the repo and never in a deploy payload — which does mean a
-rollback will not restore it, so keep a copy somewhere.
+Credentials for the upstream data sources go in `.env` — one beside the repo
+for local work, one at `/home/trevor/rachels-turk/.env` on the Pi, which the
+systemd unit reads if it is there and starts fine without. Copy `.env.example`
+and fill it in. `.env` is gitignored and never goes in a deploy payload, which
+also means a rollback will not restore it, so keep a copy somewhere.
+
+## Sources
+
+### Unleashed
+
+`src/sources/unleashed.js`. Set `UNLEASHED_API_ID` and `UNLEASHED_API_KEY`, then
+prove they work before building anything on top:
+
+```bash
+node --env-file=.env src/sources/unleashed.js Products
+```
+
+```js
+const { request, paginate, all } = require('./src/sources/unleashed.js');
+
+const first = await request('Products', { params: { pageSize: 50 }, page: 1 });
+const customers = await all('Customers');
+for await (const invoices of paginate('SalesInvoices', { modifiedSince: '2026-01-01' })) {
+  // a page at a time, so the whole ledger is never in memory at once
+}
+```
+
+Two things about Unleashed's auth that are easy to get wrong and give you a
+bare 403 with nothing in the body:
+
+- The `api-auth-signature` header is an HMAC-SHA256 of **the query string
+  alone** — not the URL, not the path, and without the leading `?`. A request
+  with no query string signs the empty string. The signed string and the sent
+  string have to match byte for byte, so the module builds it once and uses
+  that one value for both.
+- Pagination is on the **path**, not the query: `/Products/2?pageSize=200`. The
+  page number is therefore outside the signature and `pageSize` is inside it.
+
+`pageSize` caps at 200. Ask for more and you get 200 anyway, with nothing to
+say so — which reads as "that was all the data" and quietly truncates a sync.
 
 ## Troubleshooting
 
