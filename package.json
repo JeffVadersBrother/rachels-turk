@@ -1,0 +1,16 @@
+{
+  "name": "rachels-turk",
+  "version": "0.1.0",
+  "description": "Integration engine: pulls data from several sources and merges it into the format Rachel needs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "private": true
+}

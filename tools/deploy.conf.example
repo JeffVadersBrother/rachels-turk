@@ -1,0 +1,24 @@
+# Copy to tools/deploy.conf and adjust. That file is gitignored — it holds
+# hostnames, not secrets, but there is no reason to publish your Pi's address.
+#
+#   cp tools/deploy.conf.example tools/deploy.conf
+#
+# Everything here has a default baked into the scripts, so a working deploy.conf
+# can be empty. Set only what differs.
+
+# The Pi. An ssh alias from ~/.ssh/config works too, and is nicer:
+#   Host turk
+#     HostName 192.168.1.119
+#     User trevor
+PI_HOST=trevor@192.168.1.119
+
+# Where the code lives on the Pi, and where the service writes. They are kept
+# apart on purpose: a deploy extracts over PI_DIR and a rollback replaces it, so
+# anything that must survive both belongs in PI_DATA.
+# PI_DIR=/home/trevor/rachels-turk
+# PI_DATA=/home/trevor/rachels-turk-data
+
+# PI_SERVICE=rachels-turk
+# PI_PORT=3100
+# PI_RELEASES=/home/trevor/rachels-turk-releases
+# KEEP_RELEASES=5

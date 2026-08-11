@@ -1,0 +1,42 @@
+# Template. tools/provision.sh fills the @PLACEHOLDERS@ in from deploy.conf and
+# installs the result as /etc/systemd/system/rachels-turk.service — edit this
+# file and rerun provision.sh rather than editing the copy on the Pi.
+[Unit]
+Description=rachels-turk integration engine
+Documentation=https://github.com/trevorhiggans/rachels-turk
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=@USER@
+WorkingDirectory=@DIR@
+Environment=NODE_ENV=production
+Environment=PORT=@PORT@
+Environment=DATA_DIR=@DATA@
+# Anything the engine needs to authenticate to a source goes in this file on the
+# Pi, not in the repo. Missing is fine until there is something to put in it.
+EnvironmentFile=-@DIR@/.env
+ExecStart=/usr/bin/env node @DIR@/src/index.js
+
+# Restart, but not so fast that a crash loop hides itself in the log.
+Restart=always
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rachels-turk
+
+# The engine reads from the network and writes to its data directory. It has no
+# reason to touch anything else, so it is not allowed to.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=@DATA@
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

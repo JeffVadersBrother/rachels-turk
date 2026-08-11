@@ -1,0 +1,16 @@
+node_modules/
+*.log
+.DS_Store
+
+# never commit these
+tools/deploy.conf
+.env
+*.pem
+credentials.json
+token.json
+
+# runtime state, written next to the service on the Pi
+data/
+state.json
+state.json.*
+*.ndjson
